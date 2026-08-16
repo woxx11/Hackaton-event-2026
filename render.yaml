@@ -1,0 +1,28 @@
+databases:
+  - name: hisobim-db
+    plan: free
+    databaseName: hisobim
+    user: hisobim
+
+services:
+  - type: web
+    name: hisobim-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm run prisma:deploy && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hisobim-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGINS
+        value: http://localhost:3000
