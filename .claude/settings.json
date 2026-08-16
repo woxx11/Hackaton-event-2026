@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ps -W)",
+      "Bash(cp .env.example .env)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(npm install *)",
+      "Bash(mkdir -p \"/c/Users/h4wkf/Desktop/Hackaton 2026/frontend/src/app/\\(app\\)/dashboard\" \"/c/Users/h4wkf/Desktop/Hackaton 2026/frontend/src/app/\\(app\\)/products\" \"/c/Users/h4wkf/Desktop/Hackaton 2026/frontend/src/app/\\(app\\)/inventory\" \"/c/Users/h4wkf/Desktop/Hackaton 2026/frontend/src/app/\\(app\\)/customers\" \"/c/Users/h4wkf/Desktop/Hackaton 2026/frontend/src/app/\\(app\\)/sales\" \"/c/Users/h4wkf/Desktop/Hackaton 2026/frontend/src/app/\\(app\\)/sales/[id]\")",
+      "Bash(npx prisma *)",
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "Bash(curl -s http://localhost:4000/health)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(cat /tmp/backend-dev.log 2>&1)",
+      "Read(//tmp/**)",
+      "Bash(curl -s http://localhost:3000/login)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/register)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/dashboard)",
+      "Read(//c/Users/h4wkf/.claude/**)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\h4wkf\\Desktop\\Hackaton 2026\\frontend\\src\\app\\(app)\\sales"
+    ]
+  }
+}
