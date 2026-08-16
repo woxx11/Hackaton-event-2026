@@ -3,7 +3,11 @@ import { z } from "zod";
 export const listInventoryQuerySchema = z.object({
   storeId: z.string().cuid().optional(),
   search: z.string().trim().optional(),
-  lowStockOnly: z.coerce.boolean().optional().default(false),
+  lowStockOnly: z
+    .enum(["true", "false"])
+    .optional()
+    .default("false")
+    .transform((v) => v === "true"),
 });
 export type ListInventoryQuery = z.infer<typeof listInventoryQuerySchema>;
 

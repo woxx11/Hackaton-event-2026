@@ -25,7 +25,7 @@ import {
 } from "./products.controller";
 
 export const productsRouter = Router();
-productsRouter.use(requireAuth);
+productsRouter.use(requireAuth, requirePermission(PERMISSIONS.PRODUCT_VIEW));
 
 productsRouter.get("/", validate({ query: listProductsQuerySchema }), listProductsHandler);
 productsRouter.get("/:id", getProductHandler);

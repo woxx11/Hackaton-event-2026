@@ -3,6 +3,7 @@
 import { useRef, useTransition } from "react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 
 export function QuickAddList({
   label,
@@ -22,12 +23,7 @@ export function QuickAddList({
       <div className="mb-3 flex flex-wrap gap-1.5">
         {items.length === 0 && <span className="text-sm text-muted">None yet</span>}
         {items.map((item) => (
-          <span
-            key={item.id}
-            className="rounded-full border border-border bg-bg px-2.5 py-1 text-xs text-ink"
-          >
-            {item.name}
-          </span>
+          <Badge key={item.id}>{item.name}</Badge>
         ))}
       </div>
       <form

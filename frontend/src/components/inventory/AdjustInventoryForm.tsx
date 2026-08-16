@@ -13,12 +13,17 @@ export function AdjustInventoryForm({ rows, stores }: { rows: InventoryRow[]; st
   const [state, formAction, isPending] = useActionState(adjustInventoryAction, initialState);
   const [rowKey, setRowKey] = useState("");
 
-  const options = rows.map((r) => ({
-    key: `${r.productVariantId}::${r.storeId}`,
-    variantId: r.productVariantId,
-    storeId: r.storeId ?? "",
-    label: `${r.productVariant.product.name} (${r.productVariant.sku})`,
-  }));
+  // Store-level adjustment only: warehouse-only rows (storeId null) aren't
+  // supported by this form yet, so they're excluded rather than submitted
+  // with an invalid empty storeId.
+  const options = rows
+    .filter((r) => r.storeId)
+    .map((r) => ({
+      key: `${r.productVariantId}::${r.storeId}`,
+      variantId: r.productVariantId,
+      storeId: r.storeId as string,
+      label: `${r.productVariant.product.name} (${r.productVariant.sku})`,
+    }));
   const selected = options.find((o) => o.key === rowKey);
 
   return (

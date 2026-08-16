@@ -57,18 +57,17 @@ async function assertNoSkuCollision(companyId: string, skus: string[], excludeVa
 }
 
 export async function createProduct(auth: AuthContext, input: CreateProductInput) {
-  await assertNoSkuCollision(auth.companyId, input.variants.map((v) => v.sku));
-
-  if (input.categoryId) {
-    const category = await prisma.category.findFirst({
-      where: { id: input.categoryId, companyId: auth.companyId },
-    });
-    if (!category) throw AppError.badRequest("Invalid categoryId");
-  }
-  if (input.brandId) {
-    const brand = await prisma.brand.findFirst({ where: { id: input.brandId, companyId: auth.companyId } });
-    if (!brand) throw AppError.badRequest("Invalid brandId");
-  }
+  const [, category, brand] = await Promise.all([
+    assertNoSkuCollision(auth.companyId, input.variants.map((v) => v.sku)),
+    input.categoryId
+      ? prisma.category.findFirst({ where: { id: input.categoryId, companyId: auth.companyId } })
+      : Promise.resolve(null),
+    input.brandId
+      ? prisma.brand.findFirst({ where: { id: input.brandId, companyId: auth.companyId } })
+      : Promise.resolve(null),
+  ]);
+  if (input.categoryId && !category) throw AppError.badRequest("Invalid categoryId");
+  if (input.brandId && !brand) throw AppError.badRequest("Invalid brandId");
 
   const product = await prisma.product.create({
     data: {

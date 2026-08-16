@@ -47,35 +47,34 @@ export async function getSale(auth: AuthContext, saleId: string) {
 // database already trusts (ProductVariant.price), never from the request
 // body. The client only says *what* and *how many* — never *for how much*.
 export async function createSale(auth: AuthContext, input: CreateSaleInput) {
-  const employee = await prisma.employee.findFirst({
-    where: { userId: auth.userId, companyId: auth.companyId },
-  });
+  const variantIds = input.items.map((i) => i.productVariantId);
+
+  // None of these five lookups depends on another's result, so they run
+  // concurrently. (This is safe because it happens before the $transaction
+  // below — queries issued concurrently against a single interactive
+  // transaction's connection are not safe and are deliberately avoided there.)
+  const [employee, store, customer, variants, inventoryRows] = await Promise.all([
+    prisma.employee.findFirst({ where: { userId: auth.userId, companyId: auth.companyId } }),
+    prisma.store.findFirst({ where: { id: input.storeId, companyId: auth.companyId } }),
+    input.customerId
+      ? prisma.customer.findFirst({ where: { id: input.customerId, companyId: auth.companyId } })
+      : Promise.resolve(null),
+    prisma.productVariant.findMany({ where: { id: { in: variantIds }, companyId: auth.companyId } }),
+    prisma.inventory.findMany({
+      where: { productVariantId: { in: variantIds }, storeId: input.storeId, companyId: auth.companyId },
+    }),
+  ]);
+
   if (!employee) {
     throw AppError.forbidden("Your account is not linked to an employee profile that can process sales");
   }
-
-  const store = await prisma.store.findFirst({ where: { id: input.storeId, companyId: auth.companyId } });
   if (!store) throw AppError.badRequest("Invalid storeId");
-
-  if (input.customerId) {
-    const customer = await prisma.customer.findFirst({
-      where: { id: input.customerId, companyId: auth.companyId },
-    });
-    if (!customer) throw AppError.badRequest("Invalid customerId");
-  }
-
-  const variantIds = input.items.map((i) => i.productVariantId);
-  const variants = await prisma.productVariant.findMany({
-    where: { id: { in: variantIds }, companyId: auth.companyId },
-  });
+  if (input.customerId && !customer) throw AppError.badRequest("Invalid customerId");
   if (variants.length !== new Set(variantIds).size) {
     throw AppError.badRequest("One or more products are invalid for this company");
   }
-  const variantById = new Map(variants.map((v) => [v.id, v]));
 
-  const inventoryRows = await prisma.inventory.findMany({
-    where: { productVariantId: { in: variantIds }, storeId: input.storeId, companyId: auth.companyId },
-  });
+  const variantById = new Map(variants.map((v) => [v.id, v]));
   const inventoryByVariant = new Map(inventoryRows.map((r) => [r.productVariantId, r]));
 
   let subtotal = new Prisma.Decimal(0);
@@ -201,13 +200,19 @@ export async function voidSale(auth: AuthContext, saleId: string, input: VoidSal
     throw AppError.badRequest(`Sale is already ${sale.status.toLowerCase()}`);
   }
 
+  const inventoryRows = await prisma.inventory.findMany({
+    where: {
+      storeId: sale.storeId,
+      productVariantId: { in: sale.items.map((item) => item.productVariantId) },
+    },
+  });
+  const inventoryByVariant = new Map(inventoryRows.map((r) => [r.productVariantId, r]));
+
   await prisma.$transaction(async (tx) => {
     await tx.sale.update({ where: { id: sale.id }, data: { status: "VOID" } });
 
     for (const item of sale.items) {
-      const inventory = await tx.inventory.findFirst({
-        where: { productVariantId: item.productVariantId, storeId: sale.storeId },
-      });
+      const inventory = inventoryByVariant.get(item.productVariantId);
       if (inventory) {
         await tx.inventory.update({
           where: { id: inventory.id },

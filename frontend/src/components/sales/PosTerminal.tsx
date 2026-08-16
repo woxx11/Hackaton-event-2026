@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { searchProductsAction, createSaleAction } from "@/lib/actions/sales";
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { Input, Label, Select } from "@/components/ui/Input";
 import { FormError } from "@/components/ui/EmptyState";
 import type { Customer, Product, Store } from "@/lib/types";
@@ -174,7 +175,7 @@ export function PosTerminal({ stores, customers }: { stores: Store[]; customers:
           )}
         </div>
 
-        <div className="rounded-lg border border-border bg-surface">
+        <Card>
           {cart.length === 0 ? (
             <p className="px-6 py-12 text-center text-sm text-muted">Cart is empty — search for a product above.</p>
           ) : (
@@ -196,12 +197,12 @@ export function PosTerminal({ stores, customers }: { stores: Store[]; customers:
                       <p className="text-xs text-muted">{line.sku}</p>
                     </td>
                     <td className="px-6 py-3 text-right">
-                      <input
+                      <Input
                         type="number"
                         min={0}
                         value={line.quantity}
                         onChange={(e) => updateQuantity(line.variantId, Number(e.target.value))}
-                        className="h-8 w-16 rounded-md border border-border bg-surface text-right text-sm"
+                        className="h-8 w-16 text-right"
                       />
                     </td>
                     <td className="px-6 py-3 text-right text-muted">{formatMoney(line.unitPrice)}</td>
@@ -222,10 +223,10 @@ export function PosTerminal({ stores, customers }: { stores: Store[]; customers:
               </tbody>
             </table>
           )}
-        </div>
+        </Card>
       </div>
 
-      <div className="space-y-4 rounded-lg border border-border bg-surface p-6">
+      <Card className="space-y-4 p-6">
         <FormError message={error} />
 
         {stores.length > 1 && (
@@ -298,7 +299,7 @@ export function PosTerminal({ stores, customers }: { stores: Store[]; customers:
         <Button className="w-full" onClick={completeSale} disabled={isSubmitting || cart.length === 0}>
           {isSubmitting ? "Processing…" : `Complete sale · ${formatMoney(total)}`}
         </Button>
-      </div>
+      </Card>
     </div>
   );
 }
