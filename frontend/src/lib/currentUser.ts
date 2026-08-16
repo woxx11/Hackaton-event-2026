@@ -1,9 +1,9 @@
 import { apiFetch } from "./api";
-import type { CurrentUser } from "./types";
+import type { Seller } from "./types";
 
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+export async function getCurrentUser(): Promise<Seller | null> {
   try {
-    return await apiFetch<CurrentUser>("/auth/me");
+    return await apiFetch<Seller>("/seller/me");
   } catch {
     return null;
   }

@@ -17,7 +17,11 @@ export async function createDebt(sellerId: string, input: CreateDebtInput) {
   const link = await clientData.findSellerClientLink(sellerId, input.clientId);
   if (!link) throw AppError.badRequest("Bu mijoz sizning ro'yxatingizda emas");
 
-  const productIds = input.items.map((i) => i.productId);
+  const requestedQuantities = new Map<string, number>();
+  for (const item of input.items) {
+    requestedQuantities.set(item.productId, (requestedQuantities.get(item.productId) ?? 0) + item.quantity);
+  }
+  const productIds = [...requestedQuantities.keys()];
   const products = await productData.findProductsByIdsForSeller(productIds, sellerId);
   if (products.length !== new Set(productIds).size) {
     throw AppError.badRequest("Ba'zi mahsulotlar topilmadi");
@@ -25,18 +29,19 @@ export async function createDebt(sellerId: string, input: CreateDebtInput) {
   const productById = new Map(products.map((p) => [p.id, p]));
 
   let totalAmount = new Prisma.Decimal(0);
-  const items = input.items.map((item) => {
-    const product = productById.get(item.productId)!;
-    if (product.stock < item.quantity) {
+  const items = productIds.map((productId) => {
+    const product = productById.get(productId)!;
+    const quantity = requestedQuantities.get(productId)!;
+    if (product.stock < quantity) {
       throw AppError.badRequest(`"${product.name}" mahsuloti yetarli emas`, {
         product: product.name,
         available: product.stock,
-        requested: item.quantity,
+        requested: quantity,
       });
     }
-    const totalPrice = product.price.mul(item.quantity);
+    const totalPrice = product.price.mul(quantity);
     totalAmount = totalAmount.add(totalPrice);
-    return { productId: product.id, quantity: item.quantity, unitPrice: product.price, totalPrice };
+    return { productId: product.id, quantity, unitPrice: product.price, totalPrice };
   });
 
   return debtData.createDebtWithItems({

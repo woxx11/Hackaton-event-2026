@@ -7,6 +7,41 @@ export interface CurrentUser {
   company: { id: string; name: string; slug: string };
 }
 
+export interface Seller {
+  id: string;
+  name: string;
+  phone: string;
+  shopName: string | null;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  phone: string;
+  createdAt: string;
+}
+
+export interface LedgerProduct {
+  id: string;
+  name: string;
+  price: string;
+  stock: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface Debt {
+  id: string;
+  totalAmount: string;
+  paidAmount: string;
+  status: "OPEN" | "PARTIALLY_PAID" | "PAID";
+  notes: string | null;
+  createdAt: string;
+  client: Client;
+  items: Array<{ id: string; quantity: number; totalPrice: string; product: LedgerProduct }>;
+  payments: Array<{ id: string; amount: string; paidAt: string }>;
+}
+
 export interface Store {
   id: string;
   name: string;

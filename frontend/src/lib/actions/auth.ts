@@ -13,13 +13,13 @@ interface AuthResponse {
 }
 
 export async function loginAction(_prevState: AuthFormState, formData: FormData): Promise<AuthFormState> {
-  const email = String(formData.get("email") ?? "");
+  const phone = String(formData.get("phone") ?? "");
   const password = String(formData.get("password") ?? "");
 
   try {
-    const result = await apiFetch<AuthResponse>("/auth/login", {
+    const result = await apiFetch<AuthResponse>("/seller/auth/login", {
       method: "POST",
-      body: { email, password },
+      body: { phone, password },
     });
     await setToken(result.token);
   } catch (err) {
@@ -34,16 +34,15 @@ export async function registerCompanyAction(
   _prevState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const companyName = String(formData.get("companyName") ?? "");
-  const storeName = String(formData.get("storeName") ?? "Main Store");
-  const ownerName = String(formData.get("ownerName") ?? "");
-  const email = String(formData.get("email") ?? "");
+  const name = String(formData.get("name") ?? "");
+  const shopName = String(formData.get("shopName") ?? "");
+  const phone = String(formData.get("phone") ?? "");
   const password = String(formData.get("password") ?? "");
 
   try {
-    const result = await apiFetch<AuthResponse>("/auth/register", {
+    const result = await apiFetch<AuthResponse>("/seller/auth/register", {
       method: "POST",
-      body: { companyName, storeName, ownerName, email, password },
+      body: { name, shopName, phone, password },
     });
     await setToken(result.token);
   } catch (err) {

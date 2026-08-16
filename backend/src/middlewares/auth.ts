@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import { prisma } from "../data/prismaClient.js";
+import { findSellerById } from "../data/seller.data.js";
+import { findClientById } from "../data/client.data.js";
 import { AppError } from "../utils/AppError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { verifyAuthToken } from "../utils/jwt.js";
@@ -21,7 +22,7 @@ export const requireSeller = asyncHandler(async (req: Request, _res: Response, n
   const payload = readToken(req);
   if (payload.role !== "SELLER") throw AppError.forbidden("A seller account is required");
 
-  const seller = await prisma.seller.findUnique({ where: { id: payload.id } });
+  const seller = await findSellerById(payload.id);
   if (!seller) throw AppError.unauthorized("Invalid or expired session");
 
   req.seller = { role: "SELLER", sellerId: seller.id };
@@ -32,7 +33,7 @@ export const requireClient = asyncHandler(async (req: Request, _res: Response, n
   const payload = readToken(req);
   if (payload.role !== "CLIENT") throw AppError.forbidden("A client account is required");
 
-  const client = await prisma.client.findUnique({ where: { id: payload.id } });
+  const client = await findClientById(payload.id);
   if (!client) throw AppError.unauthorized("Invalid or expired session");
 
   req.client = { role: "CLIENT", clientId: client.id };

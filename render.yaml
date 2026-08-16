@@ -1,9 +1,3 @@
-databases:
-  - name: hisobim-db
-    plan: free
-    databaseName: hisobim
-    user: hisobim
-
 services:
   - type: web
     name: hisobim-api
@@ -11,13 +5,9 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install && npm run build
-    startCommand: npm run prisma:deploy && npm start
+    startCommand: npm start
     healthCheckPath: /health
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: hisobim-db
-          property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRES_IN
@@ -25,4 +15,4 @@ services:
       - key: NODE_ENV
         value: production
       - key: CORS_ORIGINS
-        value: http://localhost:3000
+        value: https://hackaton-event-2026.vercel.app,http://localhost:3000

@@ -1,24 +1,7 @@
-import { prisma } from "./prismaClient.js";
-
-export function createProduct(data: { sellerId: string; name: string; price: number; stock: number }) {
-  return prisma.product.create({ data });
-}
-
-export function listProductsForSeller(sellerId: string) {
-  return prisma.product.findMany({ where: { sellerId, isActive: true }, orderBy: { createdAt: "desc" } });
-}
-
-export function findProductByIdForSeller(id: string, sellerId: string) {
-  return prisma.product.findFirst({ where: { id, sellerId } });
-}
-
-export function findProductsByIdsForSeller(ids: string[], sellerId: string) {
-  return prisma.product.findMany({ where: { id: { in: ids }, sellerId } });
-}
-
-export function updateProduct(
-  id: string,
-  data: Partial<{ name: string; price: number; stock: number; isActive: boolean }>,
-) {
-  return prisma.product.update({ where: { id }, data });
-}
+import { Prisma } from "@prisma/client";
+import { id, memory, now } from "./memoryStore.js";
+export async function createProduct(data: { sellerId: string; name: string; price: number; stock: number }) { const created = { id: id(), sellerId: data.sellerId, name: data.name, price: new Prisma.Decimal(data.price), stock: data.stock, isActive: true, createdAt: now(), updatedAt: now() }; memory.products.push(created); return created; }
+export async function listProductsForSeller(sellerId: string) { return memory.products.filter((product) => product.sellerId === sellerId && product.isActive).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); }
+export async function findProductByIdForSeller(productId: string, sellerId: string) { return memory.products.find((product) => product.id === productId && product.sellerId === sellerId) ?? null; }
+export async function findProductsByIdsForSeller(ids: string[], sellerId: string) { return memory.products.filter((product) => ids.includes(product.id) && product.sellerId === sellerId); }
+export async function updateProduct(productId: string, data: Partial<{ name: string; price: number; stock: number; isActive: boolean }>) { const product = memory.products.find((item) => item.id === productId)!; if (data.name !== undefined) product.name = data.name; if (data.price !== undefined) product.price = new Prisma.Decimal(data.price); if (data.stock !== undefined) product.stock = data.stock; if (data.isActive !== undefined) product.isActive = data.isActive; product.updatedAt = now(); return product; }

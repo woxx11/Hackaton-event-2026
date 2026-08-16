@@ -1,27 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "HISOBIM",
-  description: "Retail operations, inventory, sales, and AI insights in one place.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  title: { default: "Hisobim — do‘koningiz hisobi", template: "%s | Hisobim" },
+  description: "Do‘kon mahsulotlari, mijozlari va qarzlarini Hisobim bilan boshqaring.",
+  applicationName: "Hisobim",
+  keywords: ["Hisobim", "qarz daftari", "do'kon hisobi", "CRM", "Uzbekistan"],
+  openGraph: { title: "Hisobim", description: "Do‘koningiz hisobi — bir joyda.", images: ["/hisobim-logo.png"] },
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className="h-full antialiased"
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
