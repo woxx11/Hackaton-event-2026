@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
+import { getLocale } from "@/lib/i18n/getDictionary";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -6,18 +8,20 @@ export const metadata: Metadata = {
   title: { default: "Hisobim — do‘koningiz hisobi", template: "%s | Hisobim" },
   description: "Do‘kon mahsulotlari, mijozlari va qarzlarini Hisobim bilan boshqaring.",
   applicationName: "Hisobim",
-  keywords: ["Hisobim", "qarz daftari", "do'kon hisobi", "CRM", "Uzbekistan"],
-  openGraph: { title: "Hisobim", description: "Do‘koningiz hisobi — bir joyda.", images: ["/hisobim-logo.png"] },
+  keywords: ["Hisobim", "qarz daftari", "do'kon hisobi", "CRM", "Uzbekistan", "POS"],
+  icons: { icon: "/logo.png" },
+  openGraph: { title: "Hisobim", description: "Do‘koningiz hisobi — bir joyda.", images: ["/logo.png"] },
   robots: { index: false, follow: false },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const locale = await getLocale();
   return (
-    <html
-      lang="en"
-      className="h-full antialiased"
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang={locale} className="h-full antialiased">
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Toaster richColors position="top-center" theme="light" />
+      </body>
     </html>
   );
 }

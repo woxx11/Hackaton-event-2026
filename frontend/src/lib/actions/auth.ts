@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { apiFetch, ApiError } from "@/lib/api";
 import { setToken, clearToken } from "@/lib/session";
+import { getDictionary } from "@/lib/i18n/getDictionary";
 
 export interface AuthFormState {
   error?: string;
@@ -24,7 +25,8 @@ export async function loginAction(_prevState: AuthFormState, formData: FormData)
     await setToken(result.token);
   } catch (err) {
     if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    const { t } = await getDictionary();
+    return { error: t.errors.generic };
   }
 
   redirect("/dashboard");
@@ -47,7 +49,8 @@ export async function registerCompanyAction(
     await setToken(result.token);
   } catch (err) {
     if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    const { t } = await getDictionary();
+    return { error: t.errors.generic };
   }
 
   redirect("/dashboard");

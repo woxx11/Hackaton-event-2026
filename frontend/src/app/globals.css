@@ -38,14 +38,38 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+::selection {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
 .auth-backdrop {
-  background: radial-gradient(circle at 15% 15%, #dce9f2 0, transparent 28%), radial-gradient(circle at 85% 82%, #dce9e1 0, transparent 24%), var(--color-bg);
+  background: radial-gradient(circle at 12% 12%, #dce9f2 0, transparent 30%), radial-gradient(circle at 88% 20%, #e9f2ec 0, transparent 26%), radial-gradient(circle at 50% 100%, #fbece6 0, transparent 30%), var(--color-bg);
 }
 
 * {

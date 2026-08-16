@@ -5,9 +5,9 @@ type Variant = "primary" | "secondary" | "danger" | "ghost";
 type Size = "sm" | "md";
 
 const variantClasses: Record<Variant, string> = {
-  primary: "bg-primary text-white hover:bg-primary-hover disabled:bg-primary/50",
-  secondary: "bg-surface text-ink border border-border hover:bg-bg disabled:opacity-50",
-  danger: "bg-danger text-white hover:bg-danger/90 disabled:bg-danger/50",
+  primary: "bg-primary text-white shadow-sm shadow-primary/20 hover:bg-primary-hover disabled:bg-primary/50",
+  secondary: "bg-surface text-ink border border-border hover:border-primary/30 hover:bg-primary-tint/40 disabled:opacity-50",
+  danger: "bg-danger text-white shadow-sm shadow-danger/20 hover:bg-danger/90 disabled:bg-danger/50",
   ghost: "text-ink hover:bg-bg disabled:opacity-50",
 };
 
@@ -25,7 +25,7 @@ export function Button({ variant = "primary", size = "md", className, ...props }
   return (
     <button
       className={clsx(
-        "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 disabled:cursor-not-allowed",
+        "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:active:scale-100",
         variantClasses[variant],
         sizeClasses[size],
         className,
