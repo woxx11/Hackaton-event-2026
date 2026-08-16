@@ -28,7 +28,7 @@ const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:4000";
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
   const token = options.token ?? (await getToken());
 
-  const url = new URL(path, BACKEND_URL);
+  const url = new URL(path, BACKEND_URL.endsWith("/") ? BACKEND_URL : `${BACKEND_URL}/`);
   if (options.query) {
     for (const [key, value] of Object.entries(options.query)) {
       if (value !== undefined) url.searchParams.set(key, String(value));

@@ -1,24 +1,27 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { clsx } from "@/lib/clsx";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/sales", label: "Sales" },
-  { href: "/products", label: "Products" },
-  { href: "/inventory", label: "Inventory" },
-  { href: "/customers", label: "Customers" },
+  { href: "/dashboard", label: "Boshqaruv" },
+  { href: "/sales", label: "Qarzlar" },
+  { href: "/products", label: "Mahsulotlar" },
+  { href: "/customers", label: "Mijozlar" },
 ];
 
-export function Sidebar({ companyName }: { companyName: string }) {
+export function Sidebar({ shopName }: { shopName: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-full w-60 flex-col border-r border-border bg-surface">
-      <div className="flex h-16 items-center border-b border-border px-6">
-        <span className="text-sm font-semibold tracking-tight text-ink">HISOBIM</span>
+    <aside className="flex h-full w-64 flex-col border-r border-primary/10 bg-surface">
+      <div className="flex h-20 items-center border-b border-border px-5">
+        <div className="flex items-center gap-3">
+          <Image src="/hisobim-logo.png" alt="Hisobim" width={40} height={40} className="h-10 w-10 rounded-xl object-cover" />
+          <span className="text-lg font-black tracking-tight text-primary">Hisobim</span>
+        </div>
       </div>
 
       <nav className="flex-1 space-y-0.5 px-3 py-4">
@@ -29,8 +32,8 @@ export function Sidebar({ companyName }: { companyName: string }) {
               key={item.href}
               href={item.href}
               className={clsx(
-                "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                active ? "bg-primary-tint text-primary" : "text-ink hover:bg-bg",
+                "flex items-center rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors",
+                active ? "bg-primary text-white shadow-sm" : "text-ink hover:bg-primary-tint hover:text-primary",
               )}
             >
               {item.label}
@@ -40,7 +43,7 @@ export function Sidebar({ companyName }: { companyName: string }) {
       </nav>
 
       <div className="border-t border-border px-6 py-4">
-        <p className="truncate text-xs font-medium uppercase tracking-wide text-muted">{companyName}</p>
+        <p className="truncate text-xs font-bold uppercase tracking-wide text-muted">{shopName}</p>
       </div>
     </aside>
   );

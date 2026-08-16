@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { loginAction, type AuthFormState } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
@@ -13,19 +14,20 @@ export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginAction, initialState);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
+    <div className="auth-backdrop flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">HISOBIM</h1>
-          <p className="mt-1 text-sm text-muted">Sign in to your store</p>
+          <Image src="/hisobim-logo.png" alt="Hisobim" width={112} height={112} priority className="mx-auto h-28 w-28 object-contain" />
+          <h1 className="mt-3 text-3xl font-black tracking-tight text-primary">Hisobim</h1>
+          <p className="mt-1 text-sm text-muted">Do‘koningiz nazorati — bir joyda</p>
         </div>
 
-        <form action={formAction} className="space-y-4 rounded-lg border border-border bg-surface p-6 shadow-sm">
+        <form action={formAction} className="space-y-4 rounded-3xl border border-white/70 bg-surface p-7 shadow-xl shadow-primary/10">
           <FormError message={state.error} />
 
           <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" autoComplete="email" required />
+            <Label htmlFor="phone">Telefon raqam</Label>
+            <Input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="+998 90 123 45 67" required />
           </div>
 
           <div>
@@ -34,14 +36,14 @@ export default function LoginPage() {
           </div>
 
           <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? "Signing in…" : "Sign in"}
+            {isPending ? "Kirilmoqda…" : "Kirish"}
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted">
-          New to HISOBIM?{" "}
+          Hisobim’da yangimisiz?{" "}
           <Link href="/register" className="font-medium text-primary hover:text-primary-hover">
-            Create your company
+            Ro‘yxatdan o‘tish
           </Link>
         </p>
       </div>

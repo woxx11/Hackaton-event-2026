@@ -2,7 +2,9 @@ import "dotenv/config";
 import { z } from "zod";
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  // Demo mode deliberately runs without a database. Data lives only in
+  // process memory and resets whenever Render restarts the service.
+  DATABASE_URL: z.string().optional(),
   PORT: z.coerce.number().default(4000),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   CORS_ORIGINS: z.string().default("http://localhost:3000"),

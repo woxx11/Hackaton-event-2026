@@ -1,105 +1,13 @@
 import { apiFetch } from "@/lib/api";
-import { createCategoryAction, createBrandAction } from "@/lib/actions/products";
-import { PageHeader } from "@/components/shell/PageHeader";
-import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { Card, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { NewProductForm } from "@/components/products/NewProductForm";
-import { QuickAddList } from "@/components/products/QuickAddList";
-import type { Brand, Category, Paginated, Product } from "@/lib/types";
+import type { LedgerProduct } from "@/lib/types";
 
-function formatMoney(value: string | number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value));
-}
+const money = (value: string) => new Intl.NumberFormat("uz-UZ", { maximumFractionDigits: 0 }).format(Number(value)) + " so‘m";
 
 export default async function ProductsPage() {
-  const [products, categories, brands] = await Promise.all([
-    apiFetch<Paginated<Product>>("/products", { query: { pageSize: 50 } }),
-    apiFetch<{ items: Category[] }>("/categories"),
-    apiFetch<{ items: Brand[] }>("/brands"),
-  ]);
-
-  return (
-    <div className="mx-auto max-w-6xl">
-      <PageHeader title="Products" subtitle="Your catalog of products and variants" />
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <Card>
-            <CardHeader title={`${products.pagination.total} products`} />
-            {products.items.length === 0 ? (
-              <EmptyState
-                title="No products yet"
-                description="Add your first product using the form to get started."
-              />
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
-                      <th className="px-6 py-3 font-medium">Product</th>
-                      <th className="px-6 py-3 font-medium">SKU</th>
-                      <th className="px-6 py-3 font-medium">Category</th>
-                      <th className="px-6 py-3 font-medium text-right">Price</th>
-                      <th className="px-6 py-3 font-medium text-right">Cost</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {products.items.map((product) =>
-                      product.variants.map((variant) => (
-                        <tr key={variant.id} className="hover:bg-bg">
-                          <td className="px-6 py-3">
-                            <p className="font-medium text-ink">{product.name}</p>
-                            {variant.name && <p className="text-xs text-muted">{variant.name}</p>}
-                          </td>
-                          <td className="px-6 py-3 text-muted">{variant.sku}</td>
-                          <td className="px-6 py-3">
-                            {product.category ? (
-                              <Badge>{product.category.name}</Badge>
-                            ) : (
-                              <span className="text-muted">—</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-3 text-right font-medium text-ink">
-                            {formatMoney(variant.price)}
-                          </td>
-                          <td className="px-6 py-3 text-right text-muted">{formatMoney(variant.cost)}</td>
-                        </tr>
-                      )),
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Card>
-
-          <Card className="p-6">
-            <div className="grid grid-cols-2 gap-8">
-              <QuickAddList
-                label="Categories"
-                items={categories.items}
-                onAdd={async (name) => {
-                  "use server";
-                  await createCategoryAction(name);
-                }}
-              />
-              <QuickAddList
-                label="Brands"
-                items={brands.items}
-                onAdd={async (name) => {
-                  "use server";
-                  await createBrandAction(name);
-                }}
-              />
-            </div>
-          </Card>
-        </div>
-
-        <Card className="h-fit p-6">
-          <h2 className="mb-4 text-base font-semibold text-ink">Add product</h2>
-          <NewProductForm categories={categories.items} brands={brands.items} />
-        </Card>
-      </div>
-    </div>
-  );
+  const { items } = await apiFetch<{ items: LedgerProduct[] }>("/seller/products");
+  return <div className="mx-auto max-w-6xl"><div className="mb-7"><p className="text-xs font-bold uppercase tracking-[.18em] text-success">Katalog</p><h1 className="mt-1 text-3xl font-black tracking-tight text-ink">Mahsulotlar</h1><p className="mt-1 text-sm text-muted">Narx va zaxirangizni bir qarashda boshqaring.</p></div><div className="grid gap-6 lg:grid-cols-3"><Card className="lg:col-span-2"><CardHeader title={`${items.length} mahsulot`} subtitle="Do‘koningizdagi faol katalog" />{items.length ? <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b text-left text-xs font-bold uppercase tracking-wide text-muted"><th className="px-6 py-3">Mahsulot</th><th className="px-6 py-3 text-right">Narx</th><th className="px-6 py-3 text-right">Zaxira</th><th className="px-6 py-3">Holat</th></tr></thead><tbody className="divide-y">{items.map((p) => <tr key={p.id} className="hover:bg-primary-tint/35"><td className="px-6 py-4 font-semibold text-ink">{p.name}</td><td className="px-6 py-4 text-right text-muted">{money(p.price)}</td><td className="px-6 py-4 text-right font-bold text-ink">{p.stock}</td><td className="px-6 py-4"><Badge tone={p.stock <= 5 ? "danger" : "success"}>{p.stock <= 5 ? "Kam qoldi" : "Yetarli"}</Badge></td></tr>)}</tbody></table></div> : <EmptyState title="Katalog bo‘sh" description="Birinchi mahsulotingizni qo‘shing." />}</Card><Card className="h-fit p-6"><h2 className="mb-1 text-lg font-black text-ink">Yangi mahsulot</h2><p className="mb-5 text-sm text-muted">Qarz yozishda darhol tanlash mumkin bo‘ladi.</p><NewProductForm /></Card></div></div>;
 }

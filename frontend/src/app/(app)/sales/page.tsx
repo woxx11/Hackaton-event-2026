@@ -1,71 +1,8 @@
-import Link from "next/link";
 import { apiFetch } from "@/lib/api";
-import { PageHeader } from "@/components/shell/PageHeader";
-import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { Card, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PosTerminal } from "@/components/sales/PosTerminal";
-import type { Customer, Paginated, Sale, Store } from "@/lib/types";
-
-function formatMoney(value: string | number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value));
-}
-
-const STATUS_TONE = {
-  COMPLETED: "success",
-  VOID: "neutral",
-  REFUNDED: "danger",
-  PARTIALLY_REFUNDED: "danger",
-} as const;
-
-export default async function SalesPage() {
-  const [stores, customers, recentSales] = await Promise.all([
-    apiFetch<{ items: Store[] }>("/stores"),
-    apiFetch<Paginated<Customer>>("/customers", { query: { pageSize: 100 } }),
-    apiFetch<Paginated<Sale>>("/sales", { query: { pageSize: 10 } }),
-  ]);
-
-  return (
-    <div className="mx-auto max-w-6xl space-y-8">
-      <PageHeader title="New sale" subtitle="Search products, build the cart, and take payment" />
-
-      <PosTerminal stores={stores.items} customers={customers.items} />
-
-      <Card>
-        <CardHeader title="Recent sales" />
-        {recentSales.items.length === 0 ? (
-          <EmptyState title="No sales yet" description="Completed sales will appear here." />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
-                  <th className="px-6 py-3 font-medium">Customer</th>
-                  <th className="px-6 py-3 font-medium">Date</th>
-                  <th className="px-6 py-3 font-medium">Status</th>
-                  <th className="px-6 py-3 font-medium text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {recentSales.items.map((sale) => (
-                  <tr key={sale.id} className="hover:bg-bg">
-                    <td className="px-6 py-3">
-                      <Link href={`/sales/${sale.id}`} className="font-medium text-primary hover:text-primary-hover">
-                        {sale.customer?.name ?? "Walk-in customer"}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-3 text-muted">{new Date(sale.createdAt).toLocaleString()}</td>
-                    <td className="px-6 py-3">
-                      <Badge tone={STATUS_TONE[sale.status]}>{sale.status}</Badge>
-                    </td>
-                    <td className="px-6 py-3 text-right font-medium text-ink">{formatMoney(sale.total)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
-    </div>
-  );
-}
+import { NewDebtForm, PaymentForm } from "@/components/sales/PosTerminal";
+import type { Client, Debt, LedgerProduct } from "@/lib/types";
+const money = (value: number | string) => new Intl.NumberFormat("uz-UZ", { maximumFractionDigits: 0 }).format(Number(value)) + " so‘m";
+export default async function DebtsPage() { const [debts, clients, products] = await Promise.all([apiFetch<{items: Debt[]}>("/seller/debts"), apiFetch<{items: Client[]}>("/seller/clients"), apiFetch<{items: LedgerProduct[]}>("/seller/products")]); return <div className="mx-auto max-w-6xl space-y-6"><div><p className="text-xs font-bold uppercase tracking-[.18em] text-danger">Qarz daftari</p><h1 className="mt-1 text-3xl font-black tracking-tight text-ink">Qarzlar</h1><p className="mt-1 text-sm text-muted">Yangi qarz yozing, to‘lovlarni belgilab boring.</p></div><div className="grid gap-6 lg:grid-cols-3"><Card className="h-fit p-6"><h2 className="mb-1 text-lg font-black text-ink">Qarz yozish</h2><p className="mb-5 text-sm text-muted">Bitta mahsulotni tez yozish formasi.</p><NewDebtForm clients={clients.items} products={products.items.filter((p) => p.isActive && p.stock > 0)} /></Card><Card className="lg:col-span-2"><CardHeader title={`${debts.items.length} yozuv`} subtitle="Eng yangilari tepada" />{debts.items.length ? <div className="divide-y">{debts.items.map((debt) => { const remaining = Number(debt.totalAmount) - Number(debt.paidAmount); return <div key={debt.id} className="grid gap-3 px-6 py-4 sm:grid-cols-[1fr_auto_auto] sm:items-center"><div><p className="font-bold text-ink">{debt.client.name}</p><p className="mt-0.5 text-xs text-muted">{debt.items.map((item) => `${item.product.name} × ${item.quantity}`).join(", ")} · {new Date(debt.createdAt).toLocaleDateString("uz-UZ")}</p></div><div><Badge tone={debt.status === "PAID" ? "success" : debt.status === "OPEN" ? "danger" : "primary"}>{debt.status === "PAID" ? "To‘langan" : debt.status === "OPEN" ? "Ochiq" : "Qisman"}</Badge><p className="mt-1 text-sm font-black text-ink">{money(remaining)}</p></div>{debt.status !== "PAID" && <PaymentForm debtId={debt.id} max={remaining} />}</div>})}</div> : <EmptyState title="Qarzlar hali yo‘q" description="Birinchi qarzni chapdagi formadan yozing." />}</Card></div></div>; }
