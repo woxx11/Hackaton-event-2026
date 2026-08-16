@@ -1,54 +1,52 @@
-import { Request, Response } from "express";
-import {
-  createSeller,
-  findSellerByPhone,
-} from "../services/seller.service";
+import { Request, Response, NextFunction } from 'express';
+import { registerSellerService, loginSellerService, getSellerByIdService } from '../services/seller.service';
 
-export const registerSeller = (req: Request, res: Response) => {
-  const { phone, name, password } = req.body;
-
-  if (!phone || !name || !password) {
-    return res.status(400).json({
-      message: "Telefon, ism va parol majburiy",
-    });
+export const registerSeller = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const seller = registerSellerService(req.body);
+    const { password, ...sellerWithoutPassword } = seller;
+    res.status(201).json(sellerWithoutPassword);
+  } catch (error) {
+    next(error);
   }
-
-  const existingSeller = findSellerByPhone(phone);
-
-  if (existingSeller) {
-    return res.status(409).json({
-      message: "Bu telefon raqami allaqachon ro'yxatdan o'tgan",
-    });
-  }
-
-  const seller = createSeller(phone, name, password);
-
-  return res.status(201).json({
-    message: "Seller muvaffaqiyatli ro'yxatdan o'tdi",
-    seller: {
-      id: seller.id,
-      phone: seller.phone,
-      name: seller.name,
-      createdAt: seller.createdAt,
-    },
-  });
 };
 
-export const getSellerByPhone = (req: Request, res: Response) => {
-  const { phone } = req.params;
-
-  const seller = findSellerByPhone(phone);
-
-  if (!seller) {
-    return res.status(404).json({
-      message: "Seller topilmadi",
-    });
+export const loginSeller = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { phone, password } = req.body;
+    const seller = loginSellerService(phone, password);
+    if (!seller) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    const { password: _, ...sellerWithoutPassword } = seller;
+    res.json(sellerWithoutPassword);
+  } catch (error) {
+    next(error);
   }
+};
 
-  return res.json({
-    id: seller.id,
-    phone: seller.phone,
-    name: seller.name,
-    createdAt: seller.createdAt,
-  });
+export const getSeller = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const seller = getSellerByIdService(req.params.id);
+    if (!seller) {
+      return res.status(404).json({ message: 'Seller not found' });
+    }
+    const { password, ...sellerWithoutPassword } = seller;
+    res.json(sellerWithoutPassword);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSellerProfile = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const seller = getSellerByIdService(req.params.id); // For now, passing ID
+    if (!seller) {
+      return res.status(404).json({ message: 'Seller not found' });
+    }
+    const { password, ...sellerWithoutPassword } = seller;
+    res.json(sellerWithoutPassword);
+  } catch (error) {
+    next(error);
+  }
 };
