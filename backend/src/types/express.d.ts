@@ -1,17 +1,18 @@
-import type { PermissionKey } from "@/utils/permissions";
+export interface SellerAuthContext {
+  role: "SELLER";
+  sellerId: string;
+}
 
-export interface AuthContext {
-  userId: string;
-  companyId: string;
-  roleId: string;
-  roleName: string;
-  permissions: Set<PermissionKey>;
+export interface ClientAuthContext {
+  role: "CLIENT";
+  clientId: string;
 }
 
 declare global {
   namespace Express {
     interface Request {
-      auth?: AuthContext;
+      seller?: SellerAuthContext;
+      client?: ClientAuthContext;
     }
   }
 }
